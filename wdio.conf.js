@@ -44,7 +44,7 @@ exports.config = {
     // will be called from there.
     //
     specs: [
-        './features/**/today.feature'
+        './features/**/*.feature'
     ],
     // Patterns to exclude.
     exclude: [

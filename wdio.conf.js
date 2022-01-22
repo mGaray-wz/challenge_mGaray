@@ -1,4 +1,27 @@
+require('dotenv').config();
 exports.config = {
+    user: process.env.BROWSERSTACK_USERNAME,
+    key: process.env.BROWSERSTACK_ACCESSKEY,
+
+    commonCapabilities: {
+        name: 'challenge',
+        build: 'challenge-build-1'
+      },
+    
+      capabilities: [{
+        'browser': 'chrome',
+        'browser_version': 'latest',
+        'os': 'Windows',
+        'os_version': '10'
+      }/*,{
+        'browser': 'firefox',
+        'browser_version': 'latest',
+        'os': 'Windows',
+        'os_version': '10'
+      }*/
+    ],
+
+      host: 'hub-cloud.browserstack.com',
     //
     // ====================
     // Runner Configuration
@@ -21,7 +44,7 @@ exports.config = {
     // will be called from there.
     //
     specs: [
-        './features/**/*.feature'
+        './features/**/today.feature'
     ],
     // Patterns to exclude.
     exclude: [
@@ -48,21 +71,6 @@ exports.config = {
     // If you have trouble getting all important capabilities together, check out the
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
-    //
-    capabilities: [{
-    
-        // maxInstances can get overwritten per capability. So if you have an in-house Selenium
-        // grid with only 5 firefox instances available you can make sure that not more than
-        // 5 instances get started at a time.
-        maxInstances: 5,
-        //
-        browserName: 'chrome',
-        acceptInsecureCerts: true
-        // If outputDir is provided WebdriverIO can capture driver session logs
-        // it is possible to configure which logTypes to include/exclude.
-        // excludeDriverLogs: ['*'], // pass '*' to exclude all driver session logs
-        // excludeDriverLogs: ['bugreport', 'server'],
-    }],
     //
     // ===================
     // Test Configurations
@@ -110,7 +118,7 @@ exports.config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    services: ['chromedriver'],
+    services: ['browserstack'],
     
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
@@ -161,6 +169,14 @@ exports.config = {
         // <boolean> Enable this config to treat undefined definitions as warnings.
         ignoreUndefinedDefinitions: false
     },
+    // Code to mark the status of test on BrowserStack based on the assertion status
+    afterTest: function (test, context, { error, result, duration, passed, retries }) {
+        if(passed) {
+        browser.executeScript('browserstack_executor: {"action": "setSessionStatus", "arguments": {"status":"passed","reason": "Assertions passed"}}');
+        } else {
+        browser.executeScript('browserstack_executor: {"action": "setSessionStatus", "arguments": {"status":"failed","reason": "At least 1 assertion failed"}}');
+        }
+    }
     
     //
     // =====
